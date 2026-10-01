@@ -889,7 +889,7 @@ function viewMes(){
   const prev=soma(ob),pago=ob.reduce((t,o)=>t+Math.min(o.pago,o.valor),0),falta=Math.max(0,prev-pago);
   const nPagas=ob.filter(o=>o.status==='pago').length;
   const lz=lazerMes(mes),teto=S.config.tetoLazer||0;
-  if(!ob.length)return `<div class="block empty">Nenhuma conta neste mês.<br><button class="btn sec" style="margin-top:10px" data-act="novaConta">Adicionar conta</button></div>`+blocoPuladas()+blocoBalanco();
+  if(!ob.length)return `<div class="block empty">Nenhuma conta neste mês.<br><button class="btn sec" style="margin-top:10px" data-act="novaConta">Adicionar conta</button></div>`+blocoGastosPagos()+blocoPuladas()+blocoBalanco();
   const grupos=[['atrasado','Atrasadas'],['parcial','Pagas em parte'],['pendente','A pagar'],['pago','Pagas']];
   let html=`<div class="block">
     <div class="muted small">Falta pagar em ${esc(nomeMes(mes).split(' ')[0])}</div>
@@ -904,7 +904,35 @@ function viewMes(){
     const g=ob.filter(o=>o.status===st);if(!g.length)continue;
     html+=`<h3 class="sec">${tit} <span class="muted small">(${g.length})</span></h3>`+g.map(rowOb).join('');
   }
-  return html+blocoPuladas()+blocoBalanco();
+  return html+blocoGastosPagos()+blocoPuladas()+blocoBalanco();
+}
+
+/* Gasto do dia a dia na aba Mês (pedido do Gabriel, 01/10/2026): "os gastos registrados no
+   app deveriam aparecer como pagos no mês em que foram registrados também".
+
+   Antes, um gasto registrado só existia na aba Gastos e numa linha de total no balanço
+   ("Gastos do dia a dia"). Quem abria o mês para ver o que já tinha saído não via o mercado,
+   o combustível nem o lanche — só as contas. Agora eles aparecem aqui, já pagos, porque
+   gasto registrado é dinheiro que JÁ saiu: não existe "gasto pendente".
+
+   🔴 Por que é uma seção à parte, e não mais um grupo dentro de "Pagas": gasto NÃO é
+   obrigação. Jogá-lo dentro de `obrigacoes()` o faria contar duas vezes no mês — `balanco`
+   soma `contas` (dos pagamentos) e `gastos` em linhas separadas, as duas já descontadas do
+   saldo — e ainda estragaria o placar: "19 de 22 contas pagas" passaria a contar ida ao
+   supermercado como conta, e a missão "Pagar tudo" (100 XP) ficaria fácil sozinha. Aqui
+   nada é recalculado: é a MESMA lista que a aba Gastos já mostra. */
+function blocoGastosPagos(){
+  const gs=gastosMes(mes).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  if(!gs.length)return '';
+  const total=soma(gs);
+  return `<h3 class="sec">Pagos no dia a dia <span class="muted small">(${gs.length} · ${brl(total)})</span></h3>`
+    +gs.map(g=>`<div class="row pago" data-act="editGasto" data-id="${g.id}" data-col="${g._col}" role="button" tabindex="0" style="cursor:pointer">
+      <div class="day" style="font-size:22px">${CAT_EMOJI[g.categoria]||'🍔'}</div>
+      <div class="info"><div class="name">${esc(g.desc||g.categoria)}</div>
+        <div class="meta">pago dia ${dataBR(g.data)}${g.quem?' por '+esc(g.quem):''}${g.foto?' 🧾':''}</div>
+        ${g.nota?`<div class="nota">💬 ${esc(g.nota)}</div>`:''}</div>
+      <div class="val">${brl(g.valor)}</div></div>`).join('')
+    +`<div class="small muted" style="margin:6px 2px 0">Já descontados em "Gastos do dia a dia", no balanço abaixo. Não contam como conta do mês.</div>`;
 }
 function blocoBalanco(){
   const b=balanco(mes);

@@ -1,0 +1,13 @@
+node_modules/
+fotos/
+*.log
+
+# Prints e backups ficam FORA do GitHub: contêm os números reais do casal
+# (contas, renda, dívidas). Os prints são saída dos testes — rode-os para regerar.
+saida/
+backups/
+
+# 🔴 O .yaml do stack carrega PGPASSWORD do Postgres compartilhado em texto puro —
+# a MESMA senha de n8n, Evolution, dashboard, viabil, visitas e pesca. Fica só na VPS,
+# em /root/missao-financas/. Nenhum outro repositório daqui rastreia o .yaml dele.
+missao-financas.yaml

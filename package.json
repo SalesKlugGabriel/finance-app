@@ -1,0 +1,16 @@
+{
+  "name": "missao-financas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Missão Finanças — orçamento gamificado do casal (Gabriel + Luana), hospedado na própria VPS.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node teste.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.4.0",
+    "pg": "^8.11.5"
+  }
+}
